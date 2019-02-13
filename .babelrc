@@ -1,0 +1,13 @@
+{
+  "presets": [
+    "@babel/preset-typescript",
+    [
+      "@babel/preset-env",
+      {
+        "targets": "last 2 Chrome version",
+        "modules": false
+      }
+    ]
+  ],
+  "plugins": [["@babel/plugin-proposal-class-properties", { "loose": true }]]
+}
