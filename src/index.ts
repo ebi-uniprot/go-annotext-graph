@@ -73,20 +73,33 @@ class GoAnnotextGraph extends LitElement {
     this.node.attr("transform", (d: NodeDatum) => `translate(${d.x}, ${d.y})`);
   };
 
-  initForceDisplay = () => {
+  initForceDisplay = () => {    
     if (this.shadowRoot === null || typeof this.data === "undefined") {
       return;
     }
     const svg = d3Select.select(
       this.shadowRoot.getElementById("annotext-graph")
     );
+
+    svg.append("svg:defs").selectAll("marker")
+      .data(["end"])      // Different link/path types can be defined here
+    .enter().append("svg:marker")    // This section adds in the arrows
+      .attr("id", String)
+      .attr("viewBox", "0 -10 15 15")
+      .attr("refX", 25)
+      .attr("refY", -1.5)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("orient", "auto")
+    .append("svg:path")
+      .attr("d", "M0,-5L10,0L0,5");
+
     // link lines
-    this.link = svg
-      .append("g")
-      .selectAll("line")
+    this.link = svg.append("g").selectAll("line")
       .data(this.data.edges)
-      .enter()
-      .append("line");
+    .enter()
+    .append("line")
+      .attr("marker-end", "url(#end)");;
 
     // node groups
     this.node = svg
@@ -107,7 +120,13 @@ class GoAnnotextGraph extends LitElement {
       .append("text")
       .attr("dx", 12)
       .attr("dy", ".35em")
-      .text((d: NodeDatum) => d.id);
+      .attr("id", (d: NodeDatum) => d.id)
+      .text((d: NodeDatum) => d.id.replace(/_/g, " "));
+
+    this.node.selectAll("text")
+      .call((d: any) => {
+        this.wrap(d);
+      });
 
     this.node.call(
       d3Drag
@@ -120,6 +139,31 @@ class GoAnnotextGraph extends LitElement {
     this.node.exit().remove();
     this.link.exit().remove();
   };
+
+  wrap(d: any) {
+    const width = 83;
+    d._groups.forEach((nodeList: any) => {
+      let textNode = this.node.select("#" + nodeList[0].id),
+        words = textNode.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        //y = textNode.attr("y"),
+        dy = parseFloat(textNode.attr("dy")),
+        tspan = textNode.text(null).append("tspan").attr("x", 0).attr("dy", dy + "em");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = textNode.append("tspan").attr("x", 0).attr("y", 0).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+        }
+      }
+    });
+  }
 
   dragstarted = d => {
     if (typeof this.simulation === "undefined") {
