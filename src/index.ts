@@ -1,6 +1,7 @@
 import { LitElement, html } from "lit-element";
 import * as d3Select from "d3-selection";
 import * as force from "d3-force";
+import * as ellipseForce from "d3-ellipse-force";
 import * as d3Drag from "d3-drag";
 import * as chromatic from "d3-scale-chromatic";
 
@@ -8,8 +9,8 @@ const url = "https://wwwdev.ebi.ac.uk/QuickGO/services/ontology/ae/relations";
 
 type NodeDatum = {
   id: string;
-  x: number;
-  y: number;
+  rx: number;
+  ry: number;
   fx: number;
   fy: number;
 };
@@ -20,13 +21,14 @@ type EdgeDatum = {
 };
 
 class GoAnnotextGraph extends LitElement {
-  width = 1000;
+  width = 1500;
   height = 900;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
   simulation: force.Simulation<NodeDatum, EdgeDatum> | undefined = undefined;
   link: any;
   node: any;
+  text: any;
 
   static get properties() {
     return {
@@ -44,39 +46,38 @@ class GoAnnotextGraph extends LitElement {
     if (typeof this.data === "undefined") {
       return;
     }
-    this.simulation = force
-      .forceSimulation(this.data.nodes)
-      .force(
-        "link",
-        force
-          .forceLink()
-          .distance(100)
-          .links(this.data.edges)
-          .id(d => d.id)
-      )
-      .force("charge", force.forceManyBody().distanceMin(10))
-      .force("center", force.forceCenter(this.width / 2, this.width / 2))
-      .on("tick", this.ticked);
-
     this.initForceDisplay();
   }
 
   ticked = () => {
     this.link
-      .attr("x1", (d: EdgeDatum) => d.source.x)
+      .attr("x1", (d: EdgeDatum) => {
+        return d.source.x;
+      })
       .attr("y1", (d: EdgeDatum) => d.source.y)
       .attr("x2", (d: EdgeDatum) => d.target.x)
       .attr("y2", (d: EdgeDatum) => d.target.y)
       .attr("stroke", this.colorScale[0])
       .attr("stroke-width", 1);
 
-    this.node.attr("transform", (d: NodeDatum) => `translate(${d.x}, ${d.y})`);
+    this.node.attr("cx", d => d.x).attr("cy", d => d.y);
+    this.text.attr("x", d => d.x).attr("y", d => d.y);
   };
 
   initForceDisplay = () => {
     if (this.shadowRoot === null || typeof this.data === "undefined") {
       return;
     }
+    const dataWithSizes = this.data.nodes.map(d => {
+      return { ...d, rx: d.id.length * 4.5, ry: 12 };
+    });
+
+    this.simulation = force
+      .forceSimulation()
+      .force("link", force.forceLink().id(d => d.id))
+      .force("collide", ellipseForce.ellipseForce(6, 0.5, 5))
+      .force("center", force.forceCenter(this.width / 2, this.width / 2));
+
     const svg = d3Select.select(
       this.shadowRoot.getElementById("annotext-graph")
     );
@@ -91,34 +92,38 @@ class GoAnnotextGraph extends LitElement {
     // node groups
     this.node = svg
       .append("g")
-      .selectAll("circle")
-      .data(this.data.nodes)
+      .selectAll("ellipse")
+      .data(dataWithSizes)
       .enter()
-      .append("g");
-
-    // node circles
-    this.node
-      .append("circle")
-      .attr("r", 5)
-      .attr("fill", this.colorScale[1]);
+      .append("ellipse")
+      .attr("rx", d => d.rx)
+      .attr("ry", d => d.ry)
+      .attr("fill", this.colorScale[1])
+      .call(
+        d3Drag
+          .drag()
+          .on("start", this.dragstarted)
+          .on("drag", this.dragged)
+          .on("end", this.dragended)
+      );
 
     // node text
-    this.node
+    this.text = svg
+      .append("g")
+      .attr("class", "labels")
+      .selectAll("text")
+      .data(dataWithSizes)
+      .enter()
       .append("text")
-      .attr("dx", 12)
-      .attr("dy", ".35em")
-      .text((d: NodeDatum) => d.id);
+      .attr("dy", 2)
+      .attr("text-anchor", "middle")
+      .text(function(d) {
+        return d.id;
+      })
+      .attr("fill", "white");
 
-    this.node.call(
-      d3Drag
-        .drag()
-        .on("start", this.dragstarted)
-        .on("drag", this.dragged)
-        .on("end", this.dragended)
-    );
-
-    this.node.exit().remove();
-    this.link.exit().remove();
+    this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
+    this.simulation.force("link").links(this.data.edges);
   };
 
   dragstarted = d => {

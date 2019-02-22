@@ -1302,6 +1302,11 @@ d3-ease@1:
   resolved "https://registry.yarnpkg.com/d3-ease/-/d3-ease-1.0.5.tgz#8ce59276d81241b1b72042d6af2d40e76d936ffb"
   integrity sha512-Ct1O//ly5y5lFM9YTdu+ygq7LleSgSE4oj7vUt9tPLHUi8VCV7QoizGpdWRWAwCO9LdYzIrQDg97+hGVdsSGPQ==
 
+d3-ellipse-force@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/d3-ellipse-force/-/d3-ellipse-force-0.1.1.tgz#73ace63ed2dccb7312c71e2bea5bc5e9bcea8476"
+  integrity sha1-c6zmPtLcy3MSxx4r6lvF6bzqhHY=
+
 d3-fetch@1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/d3-fetch/-/d3-fetch-1.1.2.tgz#957c8fbc6d4480599ba191b1b2518bf86b3e1be2"
