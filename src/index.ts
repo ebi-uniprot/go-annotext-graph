@@ -123,7 +123,7 @@ class GoAnnotextGraph extends LitElement {
       .attr("dx", "0.5em")
       .attr("dy", "1.1em")
       .attr("id", (d: NodeDatum) => d.id)
-      .text((d: NodeDatum) => d.id.replace(/_/g, " "));
+      .text((d: NodeDatum) => d.id.replace(/_/g, " ").trim());
 
     this.node.selectAll("text")
       .call((d: any) => {
