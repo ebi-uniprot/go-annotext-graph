@@ -104,22 +104,24 @@ class GoAnnotextGraph extends LitElement {
     // node groups
     this.node = svg
       .append("g")
-      .selectAll("circle")
+      .selectAll("rect")
       .data(this.data.nodes)
       .enter()
       .append("g");
 
-    // node circles
+    // node rects
     this.node
-      .append("circle")
-      .attr("r", 5)
-      .attr("fill", this.colorScale[1]);
+      .append("rect")
+      .attr("width", 90)
+      .attr("height", 45)
+      .attr("stroke", this.colorScale[1])
+      .attr("fill", "transparent");
 
     // node text
     this.node
       .append("text")
-      .attr("dx", 12)
-      .attr("dy", ".35em")
+      .attr("dx", "0.5em")
+      .attr("dy", "1.1em")
       .attr("id", (d: NodeDatum) => d.id)
       .text((d: NodeDatum) => d.id.replace(/_/g, " "));
 
@@ -151,7 +153,8 @@ class GoAnnotextGraph extends LitElement {
         lineHeight = 1.1, // ems
         //y = textNode.attr("y"),
         dy = parseFloat(textNode.attr("dy")),
-        tspan = textNode.text(null).append("tspan").attr("x", 0).attr("dy", dy + "em");
+        dx = parseFloat(textNode.attr("dx")),
+        tspan = textNode.text(null).append("tspan").attr("dx", dx + "em").attr("dy", dy + "em");
       while (word = words.pop()) {
         line.push(word);
         tspan.text(line.join(" "));
@@ -159,7 +162,7 @@ class GoAnnotextGraph extends LitElement {
           line.pop();
           tspan.text(line.join(" "));
           line = [word];
-          tspan = textNode.append("tspan").attr("x", 0).attr("y", 0).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          tspan = textNode.append("tspan").attr("x", 0).attr("y", 0).attr("dx", dx + "em").attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
         }
       }
     });
