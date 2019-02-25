@@ -29,6 +29,7 @@ class GoAnnotextGraph extends LitElement {
   link: any;
   node: any;
   text: any;
+  svg: any;
 
   static get properties() {
     return {
@@ -62,6 +63,8 @@ class GoAnnotextGraph extends LitElement {
 
     this.node.attr("cx", d => d.x).attr("cy", d => d.y);
     this.text.attr("x", d => d.x).attr("y", d => d.y);
+
+    this.wrap();
   };
 
   initForceDisplay = () => {
@@ -69,7 +72,7 @@ class GoAnnotextGraph extends LitElement {
       return;
     }
     const dataWithSizes = this.data.nodes.map(d => {
-      return { ...d, rx: d.id.length * 4.5, ry: 12 };
+      return { ...d, rx: 50, ry: 28 };
     });
 
     this.simulation = force
@@ -78,11 +81,11 @@ class GoAnnotextGraph extends LitElement {
       .force("collide", ellipseForce.ellipseForce(6, 0.5, 5))
       .force("center", force.forceCenter(this.width / 2, this.width / 2));
 
-    const svg = d3Select.select(
+    this.svg = d3Select.select(
       this.shadowRoot.getElementById("annotext-graph")
     );
     // link lines
-    this.link = svg
+    this.link = this.svg
       .append("g")
       .selectAll("line")
       .data(this.data.edges)
@@ -90,7 +93,7 @@ class GoAnnotextGraph extends LitElement {
       .append("line");
 
     // node groups
-    this.node = svg
+    this.node = this.svg
       .append("g")
       .selectAll("ellipse")
       .data(dataWithSizes)
@@ -98,7 +101,8 @@ class GoAnnotextGraph extends LitElement {
       .append("ellipse")
       .attr("rx", d => d.rx)
       .attr("ry", d => d.ry)
-      .attr("fill", this.colorScale[1])
+      .attr("stroke", this.colorScale[1])
+      .attr("fill", "transparent")
       .call(
         d3Drag
           .drag()
@@ -108,7 +112,7 @@ class GoAnnotextGraph extends LitElement {
       );
 
     // node text
-    this.text = svg
+    this.text = this.svg
       .append("g")
       .attr("class", "labels")
       .selectAll("text")
@@ -117,10 +121,11 @@ class GoAnnotextGraph extends LitElement {
       .append("text")
       .attr("dy", 2)
       .attr("text-anchor", "middle")
-      .text(function(d) {
-        return d.id;
-      })
-      .attr("fill", "white");
+      .text((d)  =>
+        d.id.replace(/_/gi, " ").trim()
+      )
+      .attr("id", (d) => d.id)
+      .attr("fill", "black");
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
@@ -148,6 +153,39 @@ class GoAnnotextGraph extends LitElement {
     d.fx = null;
     d.fy = null;
   };
+
+  wrap() {
+    const width = 80;
+
+    this.svg.selectAll("tspan").remove();
+    this.svg.selectAll("text")._groups[0].forEach((elem: any) => {
+      let textNode = this.svg.select("#" + elem.id),
+        words = elem.id.replace(/_/gi, " ").trim().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineHeight = 1.1, //em
+        x = textNode.datum().x,
+        lineNumber = 1,
+        tspan = textNode.text(null).append("tspan").attr("dx", "0em").attr("dy", "0em").attr("x", x),
+        firstTspan = textNode.select("tspan");
+      while (word = words.pop()) {
+        line.push(word);
+        tspan.text(line.join(" "));
+        if (tspan.node().getComputedTextLength() > width) {
+          line.pop();
+          tspan.text(line.join(" "));
+          line = [word];
+          tspan = textNode.append("tspan")
+            .attr("x", x)
+            .attr("dx", "0em")
+            .attr("dy", lineHeight + "em")
+            .text(word);
+          lineNumber++;
+        }
+      }
+      firstTspan.attr("dy", (-0.3 * lineNumber) + "em")
+    });
+  }
 
   render() {
     return html`
