@@ -32,6 +32,7 @@ class GoAnnotextGraph extends LitElement {
   node: any;
   text: any;
   svg: any;
+  tooltip: any;
 
   static get properties() {
     return {
@@ -99,6 +100,10 @@ class GoAnnotextGraph extends LitElement {
       this.shadowRoot.getElementById("annotext-graph")
     );
 
+    this.tooltip = d3Select.select(
+        this.shadowRoot.getElementById("gag-tooltip")
+    );
+
     this.svg.append("svg:defs").selectAll("marker")
       .data(["end"])      // Different link/path types can be defined here
       .enter().append("svg:marker")    // This section adds in the arrows
@@ -132,6 +137,10 @@ class GoAnnotextGraph extends LitElement {
       .attr("ry", d => d.ry)
       .attr("stroke", this.colorScale[4])
       .attr("fill", this.colorScale[1])
+      .attr("id", (d) => "node_" + d.id)
+      .on("click", (d) => {
+        this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
+      })
       .call(
         d3Drag
           .drag()
@@ -154,7 +163,10 @@ class GoAnnotextGraph extends LitElement {
         d.id.replace(/_/gi, " ").trim()
       )
       .attr("id", (d) => d.id)
-      .attr("fill", "black");
+      .attr("fill", "black")
+      .on("click", (d) => {
+          this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
+      });
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
@@ -216,6 +228,42 @@ class GoAnnotextGraph extends LitElement {
     });
   }
 
+  showTooltip(datum: any, pageX:number, pageY:number) {
+    this.tooltip.attr("class", "gag-closed-tooltip").html("");
+    this.svg.selectAll("ellipse").attr("stroke-width", 1);
+
+    const aNode = this.svg.select("#node_" + datum.id);
+    aNode.attr("stroke-width", 5);
+
+    this.tooltip
+      .attr("class", "gag-opened-tooltip")
+      .style("left", pageX + "px")
+      .style("top", pageY - 28 + "px");
+
+    this.tooltip.append("span")
+      .attr("class", "gag-tooltip-close")
+      .text("X")
+      .on("click", () => {
+        aNode.attr("stroke-width", 1);
+        this.tooltip.attr("class", "gag-closed-tooltip").html("");
+      });
+
+    let subsets = "";
+    datum.subsets.forEach((set: any) => {
+      subsets += "<br>" + set;
+    });
+
+    this.tooltip.append("span")
+      .html(() =>
+        datum.id + "<hr>"
+          + "<bold>GOC documentation:</bold> <a href='https://github.com/geneontology/annotation_extensions/blob/master/doc/" + datum.id + ".md' target='_blank'>" + datum.id + "</a> "
+          + "<br>" + "<bold>GO Annotation Domain: </bold>" + datum.domain
+          + "<br>" + "<bold>GO Annotation Range: </bold>" + datum.range
+          + "<br>" + "<bold>Usage: </bold>" + datum.usage
+          + "<br>" + "<bold>Subsets: </bold>" + subsets
+      );
+  }
+
   render() {
     return html`
       <style>
@@ -223,7 +271,36 @@ class GoAnnotextGraph extends LitElement {
           font-family: Helvetica, Arial, sans-serif;
           font-size: 10px;
         }
+        .gag-opened-tooltip {
+          visibility: visible;
+          float: left;
+          padding: 4px 10px 4px 4px;
+          margin: 2px;
+          width: 300px;
+          border: 1px solid black;
+          position: absolute;
+          background-color: whitesmoke;
+        }
+        .gag-closed-tooltip {
+          visibility: hidden;
+          position: absolute;
+        }
+        .gag-tooltip-close {
+          color: #FFF;
+          background-color: #333333;
+          position: absolute;
+          top: -10px;
+          right: -10px;
+          cursor: pointer;
+          border-radius: 20px;
+          width: 20px;
+          height: 20px;
+          font-size: 14px !important;
+          text-align: center;
+          border: 1px solid #fff;
+        }
       </style>
+      <div id="gag-tooltip" class="gag-closed-tooltip"></div>
       <svg
         id="annotext-graph"
         width="${this.width}"
