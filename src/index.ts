@@ -23,8 +23,8 @@ type EdgeDatum = {
 class GoAnnotextGraph extends LitElement {
   width = 1500;
   height = 900;
-  rx = 50;
-  ry = 28;
+  rx = 38;
+  ry = 38;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
   simulation: force.Simulation<NodeDatum, EdgeDatum> | undefined = undefined;
@@ -84,6 +84,7 @@ class GoAnnotextGraph extends LitElement {
     if (this.shadowRoot === null || typeof this.data === "undefined") {
       return;
     }
+
     const dataWithSizes = this.data.nodes.map(d => {
       return { ...d, rx: this.rx, ry: this.ry };
     });
@@ -91,19 +92,34 @@ class GoAnnotextGraph extends LitElement {
     this.simulation = force
       .forceSimulation()
       .force("link", force.forceLink().id(d => d.id))
-      .force("charge", ellipseForce.ellipseForce(6, 0.5, 5.9))
+      .force("charge", ellipseForce.ellipseForce(6, 0.5, 5.8))
       .force("center", force.forceCenter(this.width / 2, this.height / 2));
 
     this.svg = d3Select.select(
       this.shadowRoot.getElementById("annotext-graph")
     );
+
+    this.svg.append("svg:defs").selectAll("marker")
+      .data(["end"])      // Different link/path types can be defined here
+      .enter().append("svg:marker")    // This section adds in the arrows
+      .attr("id", String)
+      .attr("viewBox", "0 -10 15 15")
+      .attr("refX", 70)
+      .attr("refY", -1.5)
+      .attr("markerWidth", 10)
+      .attr("markerHeight", 10)
+      .attr("orient", "auto")
+      .append("svg:path")
+      .attr("d", "M0,-6L11,0L0,6");
+
     // link lines
     this.link = this.svg
       .append("g")
       .selectAll("line")
       .data(this.data.edges)
       .enter()
-      .append("line");
+      .append("line")
+      .attr("marker-end", "url(#end)");
 
     // node groups
     this.node = this.svg
@@ -114,8 +130,8 @@ class GoAnnotextGraph extends LitElement {
       .append("ellipse")
       .attr("rx", d => d.rx)
       .attr("ry", d => d.ry)
-      .attr("stroke", this.colorScale[1])
-      .attr("fill", "transparent")
+      .attr("stroke", this.colorScale[4])
+      .attr("fill", this.colorScale[1])
       .call(
         d3Drag
           .drag()
