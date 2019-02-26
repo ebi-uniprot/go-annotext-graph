@@ -21,8 +21,8 @@ type EdgeDatum = {
 };
 
 class GoAnnotextGraph extends LitElement {
-  width = 1500;
-  height = 900;
+  width = 1200;
+  height = 800;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
   simulation: force.Simulation<NodeDatum, EdgeDatum> | undefined = undefined;
@@ -79,7 +79,7 @@ class GoAnnotextGraph extends LitElement {
       .forceSimulation()
       .force("link", force.forceLink().id(d => d.id))
       .force("collide", ellipseForce.ellipseForce(6, 0.5, 5))
-      .force("center", force.forceCenter(this.width / 2, this.width / 2));
+      .force("center", force.forceCenter(this.width / 2, this.height / 2));
 
     this.svg = d3Select.select(
       this.shadowRoot.getElementById("annotext-graph")
