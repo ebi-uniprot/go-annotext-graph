@@ -21,8 +21,10 @@ type EdgeDatum = {
 };
 
 class GoAnnotextGraph extends LitElement {
-  width = 1200;
-  height = 800;
+  width = 1500;
+  height = 900;
+  rx = 50;
+  ry = 28;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
   simulation: force.Simulation<NodeDatum, EdgeDatum> | undefined = undefined;
@@ -64,6 +66,17 @@ class GoAnnotextGraph extends LitElement {
     this.node.attr("cx", d => d.x).attr("cy", d => d.y);
     this.text.attr("x", d => d.x).attr("y", d => d.y);
 
+/* We might need this if still problems with fitting inside the svg box
+    const radiusX = this.rx;
+    const radiusY = this.ry;
+    this.node
+      .attr("cx", d => Math.max(radiusX, Math.min(this.width - radiusX, d.x)))
+      .attr("cy", d => Math.max(radiusY, Math.min(this.height - radiusY, d.y)));
+    this.text
+      .attr("x", d => Math.max(radiusX, Math.min(this.width - radiusX, d.x)))
+      .attr("y", d => Math.max(radiusY, Math.min(this.height - radiusY, d.y)));
+*/
+
     this.wrap();
   };
 
@@ -72,13 +85,13 @@ class GoAnnotextGraph extends LitElement {
       return;
     }
     const dataWithSizes = this.data.nodes.map(d => {
-      return { ...d, rx: 50, ry: 28 };
+      return { ...d, rx: this.rx, ry: this.ry };
     });
 
     this.simulation = force
       .forceSimulation()
       .force("link", force.forceLink().id(d => d.id))
-      .force("collide", ellipseForce.ellipseForce(6, 0.5, 5))
+      .force("charge", ellipseForce.ellipseForce(6, 0.5, 5.9))
       .force("center", force.forceCenter(this.width / 2, this.height / 2));
 
     this.svg = d3Select.select(
