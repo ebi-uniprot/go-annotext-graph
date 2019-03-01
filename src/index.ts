@@ -5,7 +5,7 @@ import * as ellipseForce from "d3-ellipse-force";
 import * as d3Drag from "d3-drag";
 import * as chromatic from "d3-scale-chromatic";
 
-const url = "https://wwwdev.ebi.ac.uk/QuickGO/services/ontology/ae/relations";
+const url = "https://www.ebi.ac.uk/QuickGO/services/ontology/ae/relations";
 
 type NodeDatum = {
   id: string;
