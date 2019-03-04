@@ -57,9 +57,7 @@ class GoAnnotextGraph extends LitElement {
 
   ticked = () => {
     this.link
-      .attr("x1", (d: EdgeDatum) => {
-        return d.source.x;
-      })
+      .attr("x1", (d: EdgeDatum) => d.source.x)
       .attr("y1", (d: EdgeDatum) => d.source.y)
       .attr("x2", (d: EdgeDatum) => d.target.x)
       .attr("y2", (d: EdgeDatum) => d.target.y)
