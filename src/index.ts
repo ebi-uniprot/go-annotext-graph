@@ -13,6 +13,8 @@ type NodeDatum = {
   ry: number;
   fx: number;
   fy: number;
+  x?: number;
+  y?: number;
 };
 
 type EdgeDatum = {
@@ -27,7 +29,7 @@ class GoAnnotextGraph extends LitElement {
   ry = 38;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
-  simulation: force.Simulation<NodeDatum, EdgeDatum> | undefined = undefined;
+  simulation: force.Simulation<NodeDatum, EdgeDatum> | force.Simulation<{}, undefined> | undefined = undefined;
   link: any;
   node: any;
   text: any;
@@ -64,8 +66,8 @@ class GoAnnotextGraph extends LitElement {
       .attr("stroke", this.colorScale[0])
       .attr("stroke-width", 1);
 
-    this.node.attr("cx", d => d.x).attr("cy", d => d.y);
-    this.text.attr("x", d => d.x).attr("y", d => d.y);
+    this.node.attr("cx", (d: any) => d.x).attr("cy", (d: any) => d.y);
+    this.text.attr("x", (d: any) => d.x).attr("y", (d: any) => d.y);
 
 /* We might need this if still problems with fitting inside the svg box
     const radiusX = this.rx;
@@ -92,7 +94,7 @@ class GoAnnotextGraph extends LitElement {
 
     this.simulation = force
       .forceSimulation()
-      .force("link", force.forceLink().id(d => d.id))
+      .force("link", force.forceLink().id((d: any) => d.id))
       .force("charge", ellipseForce.ellipseForce(6, 0.5, 5.8))
       .force("center", force.forceCenter(this.width / 2, this.height / 2));
 
@@ -133,12 +135,12 @@ class GoAnnotextGraph extends LitElement {
       .data(dataWithSizes)
       .enter()
       .append("ellipse")
-      .attr("rx", d => d.rx)
-      .attr("ry", d => d.ry)
+      .attr("rx", (d: any) => d.rx)
+      .attr("ry", (d: any) => d.ry)
       .attr("stroke", this.colorScale[4])
       .attr("fill", this.colorScale[1])
-      .attr("id", (d) => "node_" + d.id)
-      .on("click", (d) => {
+      .attr("id", (d: any) => "node_" + d.id)
+      .on("click", (d: any) => {
         this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
       })
       .call(
@@ -159,20 +161,20 @@ class GoAnnotextGraph extends LitElement {
       .append("text")
       .attr("dy", 2)
       .attr("text-anchor", "middle")
-      .text((d)  =>
+      .text((d: any)  =>
         d.id.replace(/_/gi, " ").trim()
       )
-      .attr("id", (d) => d.id)
+      .attr("id", (d: any) => d.id)
       .attr("fill", "black")
-      .on("click", (d) => {
-          this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
+      .on("click", (d: any) => {
+        this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
       });
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
   };
 
-  dragstarted = d => {
+  dragstarted = (d: any) => {
     if (typeof this.simulation === "undefined") {
       return;
     }
@@ -181,12 +183,12 @@ class GoAnnotextGraph extends LitElement {
     d.fy = d.y;
   };
 
-  dragged = d => {
+  dragged = (d: any) => {
     d.fx = d3Select.event.x;
     d.fy = d3Select.event.y;
   };
 
-  dragended = d => {
+  dragended = (d: any) => {
     if (typeof this.simulation === "undefined") {
       return;
     }

@@ -17,7 +17,8 @@ export default {
         chromatic: 'd3-scale-chromatic',
         d3Select: 'd3-selection',
         force: 'd3-force',
-        d3Drag:'d3-drag'
+        d3Drag:'d3-drag',
+        ellipseForce:'d3-ellipse-force'
     }
   },
   plugins: [
