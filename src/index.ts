@@ -66,7 +66,7 @@ class GoAnnotextGraph extends LitElement {
       .attr("stroke", this.colorScale[0])
       .attr("stroke-width", 1);
 
-    this.node.attr("cx", (d: any) => d.x).attr("cy", (d: any) => d.y);
+    this.node.selectAll("ellipse").attr("cx", (d: any) => d.x).attr("cy", (d: any) => d.y);
     this.text.attr("x", (d: any) => d.x).attr("y", (d: any) => d.y);
 
 /* We might need this if still problems with fitting inside the svg box
@@ -131,15 +131,11 @@ class GoAnnotextGraph extends LitElement {
     // node groups
     this.node = this.svg
       .append("g")
-      .selectAll("ellipse")
+      .selectAll(".nodeGroup")
       .data(dataWithSizes)
       .enter()
-      .append("ellipse")
-      .attr("rx", (d: any) => d.rx)
-      .attr("ry", (d: any) => d.ry)
-      .attr("stroke", this.colorScale[4])
-      .attr("fill", this.colorScale[1])
-      .attr("id", (d: any) => "node_" + d.id)
+      .append("g")
+      .attr("class", "nodeGroup")
       .on("click", (d: any) => {
         this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
       })
@@ -151,24 +147,23 @@ class GoAnnotextGraph extends LitElement {
           .on("end", this.dragended)
       );
 
+    this.node
+      .append("ellipse")
+      .attr("rx", (d: any) => d.rx)
+      .attr("ry", (d: any) => d.ry)
+      .attr("stroke", this.colorScale[4])
+      .attr("fill", this.colorScale[1])
+      .attr("id", (d: any) => "node_" + d.id);
+
     // node text
-    this.text = this.svg
-      .append("g")
-      .attr("class", "labels")
-      .selectAll("text")
-      .data(dataWithSizes)
-      .enter()
+    this.text = this.node
       .append("text")
       .attr("dy", 2)
       .attr("text-anchor", "middle")
-      .text((d: any)  =>
-        d.id.replace(/_/gi, " ").trim()
-      )
+      .text((d: any)  => d.id.replace(/_/gi, " ").trim())
       .attr("id", (d: any) => d.id)
       .attr("fill", "black")
-      .on("click", (d: any) => {
-        this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
-      });
+      ;
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
@@ -203,34 +198,39 @@ class GoAnnotextGraph extends LitElement {
     this.svg.selectAll("tspan").remove();
     this.svg.selectAll("text")._groups[0].forEach((elem: any) => {
       let textNode = this.svg.select("#" + elem.id),
-        words = elem.id.replace(/_/gi, " ").trim().split(/\s+/).reverse(),
+        words = elem.id
+            .replace(/_/gi, " ")
+            .trim()
+            .split(/\s+/)
+            .reverse(),
         word,
         line = [],
         lineHeight = 1.1, //em
         x = textNode.datum().x,
         lineNumber = 1,
-        tspan = textNode.text(null).append("tspan").attr("dx", "0em").attr("dy", "0em").attr("x", x),
+        tspan = textNode.text(null).append("tspan"),
         firstTspan = textNode.select("tspan");
-      while (word = words.pop()) {
+      while ((word = words.pop())) {
         line.push(word);
         tspan.text(line.join(" "));
         if (tspan.node().getComputedTextLength() > width) {
-          line.pop();
-          tspan.text(line.join(" "));
-          line = [word];
-          tspan = textNode.append("tspan")
-            .attr("x", x)
-            .attr("dx", "0em")
-            .attr("dy", lineHeight + "em")
-            .text(word);
-          lineNumber++;
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = textNode
+                .append("tspan")
+                .attr("x", x)
+                .attr("dx", "0em")
+                .attr("dy", lineHeight + "em")
+                .text(word);
+            lineNumber++;
         }
       }
-      firstTspan.attr("dy", (-0.3 * lineNumber) + "em")
+      firstTspan.attr("dy", -0.3 * lineNumber + "em");
     });
-  }
+}
 
-  showTooltip(datum: any, pageX:number, pageY:number) {
+  showTooltip(datum: any, pageX: number, pageY: number) {
     this.tooltip.attr("class", "gag-closed-tooltip").html("");
     this.svg.selectAll("ellipse").attr("stroke-width", 1);
 
@@ -288,7 +288,7 @@ class GoAnnotextGraph extends LitElement {
           position: absolute;
         }
         .gag-tooltip-close {
-          color: #FFF;
+          color: #fff;
           background-color: #333333;
           position: absolute;
           top: -10px;
