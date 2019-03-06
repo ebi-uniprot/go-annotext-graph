@@ -29,7 +29,9 @@ class GoAnnotextGraph extends LitElement {
   ry = 38;
   data: { nodes: NodeDatum[]; edges: EdgeDatum[] } | undefined = undefined;
   colorScale = chromatic.schemeAccent;
-  simulation: force.Simulation<NodeDatum, EdgeDatum> | force.Simulation<{}, undefined> | undefined = undefined;
+  simulation:
+      | force.Simulation<NodeDatum | {}, EdgeDatum | undefined>
+      | undefined = undefined;
   link: any;
   node: any;
   text: any;
