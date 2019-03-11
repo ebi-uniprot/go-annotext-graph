@@ -163,7 +163,7 @@ class GoAnnotextGraph extends LitElement {
       .text((d: any)  => d.id.replace(/_/gi, " ").trim())
       .attr("id", (d: any) => d.id)
       .attr("fill", "black")
-      ;
+      .style("pointer-events", "none");
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
