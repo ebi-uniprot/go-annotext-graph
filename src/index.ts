@@ -138,14 +138,7 @@ class GoAnnotextGraph extends LitElement {
       .attr("class", "nodeGroup")
       .on("click", (d: any) => {
         this.showTooltip(d, d3Select.event.pageX, d3Select.event.pageY);
-      })
-      .call(
-        d3Drag
-          .drag()
-          .on("start", this.dragstarted)
-          .on("drag", this.dragged)
-          .on("end", this.dragended)
-      );
+      });
 
     this.node
       .append("ellipse")
