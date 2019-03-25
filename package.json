@@ -1,6 +1,6 @@
 {
   "name": "go-annotext-graph",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "GO annotation extension graph",
   "main": "index.ts",
   "author": "Xavier Watkins <xwatkins@ebi.ac.uk>",
