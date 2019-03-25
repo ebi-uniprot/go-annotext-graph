@@ -1,6 +1,6 @@
 {
   "name": "go-annotext-graph",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "GO annotation extension graph",
   "main": "index.ts",
   "author": "Xavier Watkins <xwatkins@ebi.ac.uk>",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "d3": "^5.9.1",
+    "d3-ellipse-force": "^0.1.1",
     "d3-scale-chromatic": "^1.3.3",
     "lit-element": "^2.0.1"
   },

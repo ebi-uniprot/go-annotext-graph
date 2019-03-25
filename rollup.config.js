@@ -12,7 +12,13 @@ export default {
     file: "dist/" + PKG_JSON.name + ".js",
     format: "iife",
     name: "index",
-    sourcemap: true
+    sourcemap: true,
+    globals: {
+        chromatic: 'd3-scale-chromatic',
+        d3Select: 'd3-selection',
+        force: 'd3-force',
+        ellipseForce:'d3-ellipse-force'
+    }
   },
   plugins: [
     nodeResolve({
