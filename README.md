@@ -17,4 +17,5 @@ Simply add the component to your code, no attributes needed
 <go-annotext-graph/>
 ```
 Once displayed, it will look like
-[graph]: ./readmeImage.png "GO annotation extension relations"
+
+![GO annotation extension relations](./readmeImage.jpg "GO annotation extension relations")
