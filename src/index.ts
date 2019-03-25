@@ -2,7 +2,6 @@ import { LitElement, html } from "lit-element";
 import * as d3Select from "d3-selection";
 import * as force from "d3-force";
 import * as ellipseForce from "d3-ellipse-force";
-import * as d3Drag from "d3-drag";
 import * as chromatic from "d3-scale-chromatic";
 
 const url = "https://www.ebi.ac.uk/QuickGO/services/ontology/ae/relations";
@@ -160,29 +159,6 @@ class GoAnnotextGraph extends LitElement {
 
     this.simulation.nodes(dataWithSizes).on("tick", this.ticked);
     this.simulation.force("link").links(this.data.edges);
-  };
-
-  dragstarted = (d: any) => {
-    if (typeof this.simulation === "undefined") {
-      return;
-    }
-    if (!d3Select.event.active) this.simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  };
-
-  dragged = (d: any) => {
-    d.fx = d3Select.event.x;
-    d.fy = d3Select.event.y;
-  };
-
-  dragended = (d: any) => {
-    if (typeof this.simulation === "undefined") {
-      return;
-    }
-    if (!d3Select.event.active) this.simulation.alphaTarget(0.0001);
-    d.fx = null;
-    d.fy = null;
   };
 
   wrap() {
