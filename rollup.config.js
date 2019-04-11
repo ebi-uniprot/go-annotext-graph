@@ -1,4 +1,4 @@
-import babel from "rollup-plugin-babel";
+import typescript from 'rollup-plugin-typescript';
 import nodeResolve from "rollup-plugin-node-resolve";
 import pluginJson from "rollup-plugin-json";
 import path from "path";
@@ -21,14 +21,11 @@ export default {
     }
   },
   plugins: [
+    typescript(),
     nodeResolve({
       jsnext: true,
       extensions: [".js", ".ts"]
     }),
-    babel({
-      exclude: "node_modules/**",
-      extensions: [".ts", ".js"]
-    }),
-    pluginJson()
+    pluginJson(),
   ]
 };
